@@ -1,4 +1,4 @@
-/// Copyright (c) 2013 Zhen, LLC. http://zhen.io. All rights reserved.
+// Copyright (c) 2013 Zhen, LLC. http://zhen.io. All rights reserved.
 // Use of this source code is governed by the Apache 2.0 license.
 
 // Ringbuffer implements a ring buffer that can leverage different storage engines
