@@ -225,24 +225,38 @@ func Test1ProducerAnd1Consumer(t *testing.T) {
 	}
 }
 
+// This test function creates a 128-slot ring buffer, with each slot being 128 bytes long.
+// It also creates 1 producer and 1 consumer, where the producer will put the same byte
+// slice into the buffer 10,000 times, and the consumer will read from the buffer and
+// then make sure we read the correct byte slice.
+
 func Test1ProducerAnd1ConsumerAgain(t *testing.T) {
-	r, err := New(128, 128)
+	// Creates a new ring buffer that's 256 slots and each slot 128 bytes long.
+	r, err := New(128, 256)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// Gets a single producer from the the ring buffer. If NewProducer() is called
+	// the second time, an error will be returned.
 	p, err := r.NewProducer()
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// Gets a singel consumer from the ring buffer. You can call NewConsumer() multiple
+	// times and get back a new consumer each time. The consumers are independent and will
+	// go through the ring buffers separately. In other words, each consumer will have
+	// their own independent sequence tracker.
 	c, err := r.NewConsumer()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var count int64 = 16
+	// We are going to write 10,000 items into the buffer.
+	var count int64 = 10000
 
+	// Let's prepare the data to write. It's just a basic byte slice that's 256 bytes long.
 	dataSize := 256
 	data := make([]byte, dataSize)
 	for i := 0; i < dataSize; i++ {
@@ -251,8 +265,13 @@ func Test1ProducerAnd1ConsumerAgain(t *testing.T) {
 
 	// Producer goroutine
 	go func() {
+		// Producer will put the same data slice into the buffer _count_ times
 		for i := int64(0); i < count; i++ {
 			if _, err := p.Put(data); err != nil {
+				// Unfortuantely we have an issue here. If the producer gets an error
+				// and exits, the consumer will continue to wait and not exit. In the
+				// real-world, we need to notify all the consumers that there's been
+				// an error and ensure they exit as well.
 				t.Fatal(err)
 			}
 		}
@@ -260,10 +279,14 @@ func Test1ProducerAnd1ConsumerAgain(t *testing.T) {
 
 	var total int64
 
+	// Consumer goroutine
+
+	// The consumer will also read from the buffer _count_times
 	for i := int64(0); i < count; i++ {
 		if out, err := c.Get(); err != nil {
 			t.Fatal(err)
 		} else {
+			// Check to see if the byte slice we got is the same as the original data
 			if !bytes.Equal(out.([]byte), data) {
 				t.Fatalf("bytes not the same")
 			}
@@ -272,6 +295,108 @@ func Test1ProducerAnd1ConsumerAgain(t *testing.T) {
 		}
 	}
 
+	// Check to make sure the count matches
+	if total != count {
+		t.Fatalf("Expected to have read %d items, got %d\n", count, total)
+	}
+}
+
+func Test1ProducerAnd2Consumer(t *testing.T) {
+	// Creates a new ring buffer that's 256 slots and each slot 128 bytes long.
+	r, err := New(128, 256)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Gets a single producer from the the ring buffer. If NewProducer() is called
+	// the second time, an error will be returned.
+	p, err := r.NewProducer()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Gets a singel consumer from the ring buffer. You can call NewConsumer() multiple
+	// times and get back a new consumer each time. The consumers are independent and will
+	// go through the ring buffers separately. In other words, each consumer will have
+	// their own independent sequence tracker.
+	c, err := r.NewConsumer()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c2, err := r.NewConsumer()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// We are going to write 10,000 items into the buffer.
+	var count int64 = 10000
+
+	// Let's prepare the data to write. It's just a basic byte slice that's 256 bytes long.
+	dataSize := 256
+	data := make([]byte, dataSize)
+	for i := 0; i < dataSize; i++ {
+		data[i] = byte(i % 256)
+	}
+
+	// Producer goroutine
+	go func() {
+		// Producer will put the same data slice into the buffer _count_ times
+		for i := int64(0); i < count; i++ {
+			if _, err := p.Put(data); err != nil {
+				// Unfortuantely we have an issue here. If the producer gets an error
+				// and exits, the consumer will continue to wait and not exit. In the
+				// real-world, we need to notify all the consumers that there's been
+				// an error and ensure they exit as well.
+				t.Fatal(err)
+			}
+		}
+	}()
+
+	// Consumer goroutine #1
+	go func() {
+		var total int64
+
+
+		// The consumer will also read from the buffer _count_times
+		for i := int64(0); i < count; i++ {
+			if out, err := c.Get(); err != nil {
+				t.Fatal(err)
+			} else {
+				// Check to see if the byte slice we got is the same as the original data
+				if !bytes.Equal(out.([]byte), data) {
+					t.Fatalf("bytes not the same")
+				}
+
+				total++
+			}
+		}
+
+		// Check to make sure the count matches
+		if total != count {
+			t.Fatalf("Expected to have read %d items, got %d\n", count, total)
+		}
+	}()
+	
+	var total int64
+
+	// Consumer goroutine #2
+
+	// The consumer will also read from the buffer _count_times
+	for i := int64(0); i < count; i++ {
+		if out, err := c2.Get(); err != nil {
+			t.Fatal(err)
+		} else {
+			// Check to see if the byte slice we got is the same as the original data
+			if !bytes.Equal(out.([]byte), data) {
+				t.Fatalf("bytes not the same")
+			}
+
+			total++
+		}
+	}
+
+	// Check to make sure the count matches
 	if total != count {
 		t.Fatalf("Expected to have read %d items, got %d\n", count, total)
 	}
@@ -312,6 +437,85 @@ func Benchmark1ProducerAnd1Consumer(b *testing.B) {
 		}
 	}()
 
+	var total int64
+
+	for i := int64(0); i < count; i++ {
+		if out, err := c.Get(); err != nil {
+			b.Fatal(err)
+		} else {
+			if !bytes.Equal(out.([]byte), data) {
+				b.Fatalf("bytes not the same")
+			}
+
+			total++
+		}
+	}
+
+	if total != count {
+		b.Fatalf("Expected to have read %d items, got %d\n", count, total)
+	}
+}
+
+func Benchmark1ProducerAnd2Consumers(b *testing.B) {
+	r, err := New(128, 128)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	p, err := r.NewProducer()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	c, err := r.NewConsumer()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	c2, err := r.NewConsumer()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	var count int64 = int64(b.N)
+
+	dataSize := 256
+	data := make([]byte, dataSize)
+	for i := 0; i < dataSize; i++ {
+		data[i] = byte(i % 256)
+	}
+
+	b.ResetTimer()
+
+	// Producer goroutine
+	go func() {
+		for i := int64(0); i < count; i++ {
+			if _, err := p.Put(data); err != nil {
+				b.Fatal(err)
+			}
+		}
+	}()
+
+	go func() {
+		var total int64
+
+		for i := int64(0); i < count; i++ {
+			if out, err := c2.Get(); err != nil {
+				b.Fatal(err)
+			} else {
+				if !bytes.Equal(out.([]byte), data) {
+					b.Fatalf("bytes not the same")
+				}
+
+				total++
+			}
+		}
+
+		if total != count {
+			b.Fatalf("Expected to have read %d items, got %d\n", count, total)
+		}
+	}()
+	
 	var total int64
 
 	for i := int64(0); i < count; i++ {
