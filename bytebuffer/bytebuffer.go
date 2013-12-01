@@ -211,9 +211,8 @@ func (this *byteBuffer) NextDataSize(seq int64) int {
 
 // validData returns whether the data supplied is a valid type for this storage engine
 func (this *byteBuffer) validData(data interface{}) ([]byte, error) {
-	switch data := data.(type) {
-	case []byte:
-		return data, nil
+	if v, ok := data.([]byte); ok {
+		return v, nil
 	}
 
 	return nil, ErrDataInvalid
