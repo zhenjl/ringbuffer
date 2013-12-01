@@ -11,7 +11,6 @@ import (
 
 var _ = log.Ldate
 
-/*
 func TestErrMaxProducerCountExceeded(t *testing.T) {
 	r, err := New(10, 128)
 	if err != nil {
@@ -225,7 +224,7 @@ func Test1ProducerAnd1Consumer(t *testing.T) {
 		t.Fatalf("Expected to have read %d items, got %d\n", count, total)
 	}
 }
-*/
+
 func Test1ProducerAnd1ConsumerAgain(t *testing.T) {
 	r, err := New(128, 128)
 	if err != nil {
