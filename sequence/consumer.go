@@ -4,10 +4,10 @@
 package sequence
 
 import (
+	"github.com/reducedb/ringbuffer"
 	"log"
 	"math"
 	"runtime"
-	"github.com/reducedb/ringbuffer"
 )
 
 var _ = log.Ldate
@@ -69,6 +69,6 @@ func (this *Consumer) Request(n int) (int64, error) {
 
 		this.cachedGate = minSeq
 	}
-	
+
 	return nextSeq, nil
 }

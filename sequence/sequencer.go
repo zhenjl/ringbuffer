@@ -5,17 +5,17 @@ package sequence
 
 import (
 	"errors"
-	"log"
 	"fmt"
-	"sync"
 	"github.com/reducedb/ringbuffer"
+	"log"
+	"sync"
 )
 
 var _ = log.Ldate
 
 var (
 	ErrNotPositiveInteger = errors.New("sequence.sequencer: Not Positive Integer Value")
-	ErrNotPowerOfTwo       = errors.New("ringbuffer.ByteBuffer: Slot Count Must Be Power of Two")
+	ErrNotPowerOfTwo      = errors.New("ringbuffer.ByteBuffer: Slot Count Must Be Power of Two")
 )
 
 type sequencer struct {

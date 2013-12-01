@@ -16,7 +16,7 @@ func TestErrDataExceedsMaxSize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	st := b.(*byteBuffer)
 
 	src := make([]byte, 1000000)
@@ -191,12 +191,12 @@ func TestReadMaxDataSize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	st := b.(*byteBuffer)
-	
-	st.buffer[0] = 255	
-	st.buffer[1] = 255	
-	
+
+	st.buffer[0] = 255
+	st.buffer[1] = 255
+
 	_, err = st.Get(0)
 	if err != ErrDataExceedsMaxSize {
 		t.Fatal("Should have exited with ErrDataExceedsMaxSize, " + err.Error())

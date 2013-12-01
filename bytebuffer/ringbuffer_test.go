@@ -4,23 +4,24 @@
 package bytebuffer
 
 import (
-	"log"
 	"bytes"
+	"log"
 	"testing"
 )
 
 var _ = log.Ldate
+
 /*
 func TestErrMaxProducerCountExceeded(t *testing.T) {
 	r, err := New(10, 128)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if _, err := r.NewProducer(); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if _, err := r.NewProducer(); err != ErrMaxProducerCountExceeded {
 		t.Fatal("Expecting ErrMaxProducerCountExceeded, didn't get it")
 	}
@@ -53,7 +54,7 @@ func TestProducerNoWrap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	data := []byte{1, 2, 3, 4}
 
 	for i := int64(0); i < 10; i++ {
@@ -80,7 +81,7 @@ func TestProducerWrap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	data := []byte{1, 2, 3, 4, 5, 6, 7}
 
 	for i := int64(0); i < 10; i++ {
@@ -246,9 +247,9 @@ func Test1ProducerAnd1ConsumerAgain(t *testing.T) {
 	dataSize := 256
 	data := make([]byte, dataSize)
 	for i := 0; i < dataSize; i++ {
-		data[i] = byte(i%256)
+		data[i] = byte(i % 256)
 	}
-	
+
 	// Producer goroutine
 	go func() {
 		for i := int64(0); i < count; i++ {
@@ -294,13 +295,13 @@ func Benchmark1ProducerAnd1Consumer(b *testing.B) {
 	}
 
 	var count int64 = int64(b.N)
-	
+
 	dataSize := 256
 	data := make([]byte, dataSize)
 	for i := 0; i < dataSize; i++ {
-		data[i] = byte(i%256)
+		data[i] = byte(i % 256)
 	}
-	
+
 	b.ResetTimer()
 
 	// Producer goroutine
@@ -335,7 +336,7 @@ func BenchmarkChannels(b *testing.B) {
 	dataSize := 256
 	data := make([]byte, dataSize)
 	for i := 0; i < dataSize; i++ {
-		data[i] = byte(i%256)
+		data[i] = byte(i % 256)
 	}
 
 	ch := make(chan []byte, 128)

@@ -37,7 +37,7 @@ var (
 	ErrSlotSizeTooSmall         = fmt.Errorf("bytebuffer: Slot Size Is Too Small")
 	ErrNotPowerOfTwo            = fmt.Errorf("bytebuffer: Slot Count Must Be Power of Two")
 	ErrMaxProducerCountExceeded = fmt.Errorf("bytebuffer: This ringbuffer only allows %d producer(s)", MaxProducerCount)
-	ErrMaxDataSlotsExceeded = fmt.Errorf("bytebuffer: Max Data Slots (%d) Exceeded", MaxDataSlots)
+	ErrMaxDataSlotsExceeded     = fmt.Errorf("bytebuffer: Max Data Slots (%d) Exceeded", MaxDataSlots)
 )
 
 //
@@ -67,7 +67,7 @@ func New(slotSize, slotCount int) (ringbuffer.RingBuffer, error) {
 	if slotCount > MaxDataSlots {
 		return nil, ErrMaxDataSlotsExceeded
 	}
-	
+
 	if !ringbuffer.PowerOfTwo(slotCount) {
 		return nil, ErrNotPowerOfTwo
 	}
@@ -107,7 +107,7 @@ func (this *byteBuffer) Put(data []byte, seq int64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	
+
 	n, i, l := len(data), 0, 0
 
 	slot := seq & int64(this.slotMask)
@@ -196,9 +196,9 @@ func (this *byteBuffer) SlotsNeeded(size int) (int, error) {
 	if needed > this.slotCount {
 		return 0, ErrDataExceedsMaxSlots
 	}
-	
+
 	//log.Printf("needed = %d, slotCount = %d\n", needed, this.slotCount)
-	
+
 	return needed, nil
 }
 

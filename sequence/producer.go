@@ -4,8 +4,8 @@
 package sequence
 
 import (
-	"log"
 	"github.com/reducedb/ringbuffer"
+	"log"
 )
 
 var _ = log.Ldate

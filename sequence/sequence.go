@@ -14,12 +14,12 @@ const (
 // To avoid false sharing, e.g., having the same sequence variables in the same cache line,
 // we will make each sequence 64 bytes, which is the most common cache line size.
 type sequence struct {
-	cursor, cachedGate, p2, p3, p4, p5, p6, p7 int64 	
+	cursor, cachedGate, p2, p3, p4, p5, p6, p7 int64
 }
 
 func NewSequence() *sequence {
 	return &sequence{
-		cursor: InitialSequenceValue,
+		cursor:     InitialSequenceValue,
 		cachedGate: InitialSequenceValue,
 	}
 }
@@ -32,4 +32,3 @@ func (this *sequence) Set(seq int64) error {
 	atomic.StoreInt64(&this.cursor, seq)
 	return nil
 }
-

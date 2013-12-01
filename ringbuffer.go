@@ -35,7 +35,7 @@ type Sequencer interface {
 }
 
 func GetMinSeq(gates []Sequencer, min int64) (int64, error) {
-	for _, seq := range gates {		
+	for _, seq := range gates {
 		if v, err := seq.Get(); err != nil {
 			return 0, err
 		} else if v < min {
