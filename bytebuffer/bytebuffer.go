@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/reducedb/ringbuffer"
 	"log"
-	"math"
+	//"math"
 	"sync"
 )
 
@@ -187,11 +187,13 @@ func (this *byteBuffer) SlotsNeeded(size int) (int, error) {
 		return 0, ErrDataExceedsMaxSize
 	}
 
-	if size == 0 {
+    size += SlotOverhead
+	if size == SlotOverhead || size <= this.slotSize {
 		return 1, nil
 	}
 
-	needed := int(math.Ceil(float64(size+SlotOverhead) / float64(this.slotSize)))
+	//needed := int(math.Ceil(float64(size+SlotOverhead) / float64(this.slotSize)))
+    needed := 1 + ((size - 1) / this.slotSize)
 
 	if needed > this.slotCount {
 		return 0, ErrDataExceedsMaxSlots
