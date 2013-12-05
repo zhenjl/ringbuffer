@@ -456,6 +456,60 @@ func Benchmark1ProducerAnd1Consumer(b *testing.B) {
 	}
 }
 
+func Benchmark1ProducerAnd1ConsumerInBytes(b *testing.B) {
+	r, err := New(128, 128)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	p, err := r.NewProducer()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	c, err := r.NewConsumer()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	var count int64 = int64(b.N)
+
+	dataSize := 256
+	data := make([]byte, dataSize)
+	for i := 0; i < dataSize; i++ {
+		data[i] = byte(i % 256)
+	}
+
+	b.ResetTimer()
+
+	// Producer goroutine
+	go func() {
+		for i := int64(0); i < count; i++ {
+			if _, err := p.PutBytes(data); err != nil {
+				b.Fatal(err)
+			}
+		}
+	}()
+
+	var total int64
+
+	for i := int64(0); i < count; i++ {
+		if out, err := c.GetBytes(); err != nil {
+			b.Fatal(err)
+		} else {
+			if !bytes.Equal(out, data) {
+				b.Fatalf("bytes not the same")
+			}
+
+			total++
+		}
+	}
+
+	if total != count {
+		b.Fatalf("Expected to have read %d items, got %d\n", count, total)
+	}
+}
+
 func Benchmark1ProducerAnd2Consumers(b *testing.B) {
 	r, err := New(128, 128)
 	if err != nil {

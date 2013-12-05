@@ -18,10 +18,12 @@ type RingBuffer interface {
 
 type Producer interface {
 	Put(interface{}) (int, error)
+	PutBytes([]byte) (int, error)
 }
 
 type Consumer interface {
 	Get() (interface{}, error)
+	GetBytes() ([]byte, error)
 }
 
 type Sequencer interface {

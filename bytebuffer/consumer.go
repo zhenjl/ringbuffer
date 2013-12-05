@@ -45,24 +45,53 @@ func (this *byteBuffer) NewConsumer() (ringbuffer.Consumer, error) {
 func (this *consumer) Get() (interface{}, error) {
 	seq, err := this.seq.Request(1)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	size := this.buffer.NextDataSize(seq)
 	needed, err := this.buffer.SlotsNeeded(size)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	seq, err = this.seq.Request(needed)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	//log.Printf("consumer: size = %d, needed = %d, seq = %d\n", size, needed, seq)
 
 	data, err := this.buffer.Get(seq + 1 - int64(needed))
 	if err != nil {
-		return 0, err
+		return nil, err
+	}
+
+	//log.Printf("consumer: commit %d\n", seq)
+	this.seq.Commit(seq)
+
+	return data, nil
+}
+
+func (this *consumer) GetBytes() ([]byte, error) {
+	seq, err := this.seq.Request(1)
+	if err != nil {
+		return nil, err
+	}
+
+	size := this.buffer.NextDataSize(seq)
+	needed, err := this.buffer.SlotsNeeded(size)
+	if err != nil {
+		return nil, err
+	}
+
+	seq, err = this.seq.Request(needed)
+	if err != nil {
+		return nil, err
+	}
+	//log.Printf("consumer: size = %d, needed = %d, seq = %d\n", size, needed, seq)
+
+	data, err := this.buffer.Get(seq + 1 - int64(needed))
+	if err != nil {
+		return nil, err
 	}
 
 	//log.Printf("consumer: commit %d\n", seq)
